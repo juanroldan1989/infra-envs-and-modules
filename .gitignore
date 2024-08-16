@@ -1,0 +1,5 @@
+### Terraform ###
+infra/envs/*/*/.terraform
+infra/envs/*/*/terraform.tfstate
+infra/envs/*/*/terraform.tfstate.backup
+infra/modules/*/.terraform
