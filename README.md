@@ -78,3 +78,11 @@ $ cd infra/envs/dev
 
 $ ./tf.sh destroy
 ```
+
+## Backend `remote` implementation
+
+### Setup S3 state storage
+
+### Modules
+
+- Have 1 sample application imported from a Github repo instead of a folder within `modules` folder.
