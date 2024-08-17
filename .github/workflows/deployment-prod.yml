@@ -1,0 +1,48 @@
+name: Terraform Deployment (prod)
+
+on:
+  workflow_run:
+    workflows: ["Terraform workflow"]
+    types:
+      - completed
+  push:
+    paths:
+      - "infra/envs/prod"
+
+jobs:
+  terraform:
+    name: "Terraform deploy"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./infra/envs/prod
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check if triggered by main branch
+        id: check_branch
+        run: |
+          if [[ "${{ github.event.workflow_run.head_branch }}" != "main" ]]; then
+            echo "This workflow was not triggered by the main branch. Exiting."
+            exit 1
+          fi
+
+      - name: Setup Terraform with specified version on the runner
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+
+      - name: Run terraform apply script on DEV components
+        run: ./tf.sh apply

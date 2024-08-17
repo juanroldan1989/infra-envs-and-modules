@@ -169,8 +169,8 @@ Terraform with GitOps: https://spacelift.io/blog/terraform-gitops
 
 ## Github Actions - Automation
 
-1. Watch for changes within `argocd` applications.
-2. Watch for changes within `dev` environment.
+1. Watch for changes within `dev` environment.
+2. Watch for changes within `prod` environment.
 3. Setup remote state and associate `dev` folder with `dev` workspace in Terraform.
 
 ## Monitoring
