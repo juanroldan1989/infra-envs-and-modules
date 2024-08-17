@@ -1,0 +1,22 @@
+# ArgoCD Application created through `kubectl` and Kubernetes Application Manifest
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+ name: k8s-ingress-service-app
+ namespace: argocd
+spec:
+ project: default
+ source:
+   repoURL: "https://github.com/juanroldan1989/infra-envs-and-modules"
+   targetRevision: HEAD
+   path: "infra/modules/applications/k8s-ingress-service-app"
+ destination:
+   server: "https://kubernetes.default.svc"
+   namespace: ingress-service-app
+ syncPolicy:
+   automated:
+     prune: true
+     selfHeal: true
+   syncOptions:
+   - CreateNamespace=true

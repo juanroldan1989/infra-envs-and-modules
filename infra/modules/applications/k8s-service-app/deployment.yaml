@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: myapp
-          image: aputra/myapp-195:v2
+          image: k8s.gcr.io/e2e-test-images/echoserver:2.5
           ports:
             - name: http
               containerPort: 8080
