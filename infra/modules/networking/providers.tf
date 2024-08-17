@@ -16,12 +16,13 @@ provider "aws" {
   shared_credentials_files = ["/Users/juan/.aws/credentials"]
   profile                  = "default"
 
-
   default_tags {
     tags = {
       owner       = "Juan Roldan"
       project     = "AWS EKS Cluster"
       cost-center = "AWS EKS Billing"
+      environment = var.env
+      app_name    = var.app_name
       Name        = "Managed by Terraform"
     }
   }
