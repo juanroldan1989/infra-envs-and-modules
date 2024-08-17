@@ -60,8 +60,9 @@
 The above structure allows engineers to:
 
 1. Work on specific environments they are allowed to.
-2. Add/Remove modules as they need in order to build their applications within their environments.
-3. Deploy specific applications (e.g.: app-a, app-b or app-c) within their specific environments.
+2. Each envs folder (`dev`, `prod`, etc) is associated with a specific `Terraform` workspace.
+3. Add/Remove modules as they need in order to build their applications within their environments.
+4. Deploy specific applications/modules (e.g.: `networking`, `addons`, `argocd-app-1`) within their specific environments.
 
 Script below provisions `VPC`, spins up `EKS Cluster`, adds `networking`, `addons` and deploys `app-b` for showcasing purposes:
 
@@ -79,7 +80,7 @@ $ cd infra/envs/dev
 $ ./tf.sh destroy
 ```
 
-## Connecting to the cluster
+## EKS Cluster
 
 Check user currently used to make calls via CLI:
 
@@ -101,7 +102,7 @@ Check for access:
 $ kubectl get nodes
 ```
 
-### Access Argo CD server
+## Argo CD Server
 
 In order to access the server UI you have the following options:
 
@@ -121,6 +122,10 @@ After reaching the UI the first time you can login with `username: admin` and th
 
 ```ruby
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+# or using jq
+
+kubectl -n argocd get secret argocd-initial-admin-secret -o json | jq .data.password -r | base64 -d
 ```
 
 (You should delete the initial secret afterwards as suggested by the Getting Started Guide: https://github.com/argoproj/argo-cd/blob/master/docs/getting_started.md#4-login-using-the-cli)
@@ -156,6 +161,24 @@ resource "helm_release" "argocd" {
 }
 ```
 
+### References
+
+https://spacelift.io/blog/argocd-terraform
+
+Terraform with GitOps: https://spacelift.io/blog/terraform-gitops
+
+## Github Actions - Automation
+
+1. Watch for changes within `argocd` applications.
+2. Watch for changes within `dev` environment.
+3. Setup remote state and associate `dev` folder with `dev` workspace in Terraform.
+
+## Monitoring
+
+Integrate Graphana and Kibana
+
+## Logs
+
 ## Backend `remote` implementation
 
 ### Setup S3 state storage
@@ -165,14 +188,6 @@ https://spacelift.io/blog/terraform-remote-state#benefits-of-using-terraform-rem
 ### Modules
 
 - Have 1 sample application imported from a Github repo instead of a folder within `modules` folder.
-
-## Argo CD
-
-### References
-
-https://spacelift.io/blog/argocd-terraform
-
-Terraform with GitOps: https://spacelift.io/blog/terraform-gitops
 
 ## Tagging
 
