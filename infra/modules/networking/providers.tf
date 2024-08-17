@@ -12,9 +12,14 @@ terraform {
 provider "aws" {
   region = "us-east-1"
 
+  shared_config_files      = ["/Users/juan/.aws/config"]
+  shared_credentials_files = ["/Users/juan/.aws/credentials"]
+  profile                  = "default"
+
+
   default_tags {
     tags = {
-      owner       = "Fastned"
+      owner       = "Juan Roldan"
       project     = "AWS EKS Cluster"
       cost-center = "AWS EKS Billing"
       Name        = "Managed by Terraform"
