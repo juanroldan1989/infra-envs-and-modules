@@ -10,7 +10,7 @@ metadata:
   name: myapp
   namespace: ingress-service-app
 spec:
-  replicas: 1
+  replicas: 4
   selector:
     matchLabels:
       app: myapp
@@ -21,10 +21,10 @@ spec:
     spec:
       containers:
         - name: myapp
-          image: aputra/myapp-195:v2
+          image: nginx:1.14.2
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: 80
           resources:
             requests:
               memory: 128Mi
@@ -41,7 +41,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 8080
+    - port: 80
       targetPort: http
   selector:
     app: myapp
@@ -66,4 +66,4 @@ spec:
               service:
                 name: myapp
                 port:
-                  number: 8080
+                  number: 80
