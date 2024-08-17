@@ -36,7 +36,7 @@ resource "aws_eks_access_entry" "developer" {
 data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "eks_admin" {
-  name = "${var.env}-${var.eks_name}-eks-admin"
+  name = "${var.app_name}-${var.env}-${var.eks_name}-eks-admin"
 
   assume_role_policy = <<POLICY
 {
