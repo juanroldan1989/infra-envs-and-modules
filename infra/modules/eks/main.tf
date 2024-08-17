@@ -1,5 +1,5 @@
 resource "aws_eks_cluster" "eks" {
-  name     = "${var.env}-${var.eks_name}"
+  name     = "${var.app_name}-${var.env}-${var.eks_name}"
   version  = var.eks_version
   role_arn = aws_iam_role.eks.arn
 
@@ -19,10 +19,14 @@ resource "aws_eks_cluster" "eks" {
   }
 
   depends_on = [aws_iam_role_policy_attachment.eks]
+
+  tags = {
+    Name = "${var.app_name}-${var.env}-eks-cluster-eks"
+  }
 }
 
 resource "aws_iam_role" "eks" {
-  name = "${var.env}-${var.eks_name}-eks-cluster"
+  name = "${var.app_name}-${var.env}-${var.eks_name}-eks-cluster"
 
   assume_role_policy = <<POLICY
 {
@@ -46,7 +50,7 @@ resource "aws_iam_role_policy_attachment" "eks" {
 }
 
 resource "aws_iam_role" "nodes" {
-  name = "${var.env}-${var.eks_name}-eks-nodes"
+  name = "${var.app_name}-${var.env}-${var.eks_name}-eks-nodes"
 
   assume_role_policy = <<POLICY
 {
@@ -116,5 +120,9 @@ resource "aws_eks_node_group" "general" {
 
   lifecycle {
     ignore_changes = [scaling_config[0].desired_size]
+  }
+
+  tags = {
+    Name = "${var.app_name}-${var.env}-eks-node-group-general"
   }
 }
