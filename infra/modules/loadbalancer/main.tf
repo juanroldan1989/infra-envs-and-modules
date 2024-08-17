@@ -48,12 +48,12 @@ resource "aws_iam_role_policy_attachment" "aws_lbc" {
 resource "aws_eks_pod_identity_association" "aws_lbc" {
   cluster_name    = var.eks_name
   namespace       = "kube-system"
-  service_account = "aws-load-balancer-controller"
+  service_account = "${var.app_name}-${var.env}-aws-load-balancer-controller"
   role_arn        = aws_iam_role.aws_lbc.arn
 }
 
 resource "helm_release" "aws_lbc" {
-  name = "aws-load-balancer-controller"
+  name = "${var.app_name}-${var.env}-aws-load-balancer-controller"
 
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
@@ -67,7 +67,7 @@ resource "helm_release" "aws_lbc" {
 
   set {
     name  = "serviceAccount.name"
-    value = "aws-load-balancer-controller"
+    value = "${var.app_name}-${var.env}-aws-load-balancer-controller"
   }
 
   depends_on = [var.cluster_autoscaler]
