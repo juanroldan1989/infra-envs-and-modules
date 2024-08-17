@@ -86,3 +86,30 @@ $ ./tf.sh destroy
 ### Modules
 
 - Have 1 sample application imported from a Github repo instead of a folder within `modules` folder.
+
+## Argo CD
+
+### References
+
+https://spacelift.io/blog/argocd-terraform
+
+Terraform with GitOps: https://spacelift.io/blog/terraform-gitops
+
+## Tagging
+
+All resources should be tagged properly:
+
+```ruby
+...
+
+tags = {
+  Name = "${var.app_name}-${var.env}-<resource-name>"
+}
+```
+
+Example:
+
+```
+"payment-app-staging-ingress"
+"frontend-app-production-vpc"
+```

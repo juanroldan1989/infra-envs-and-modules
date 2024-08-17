@@ -20,7 +20,7 @@ variable "zone2" {
 
 variable "eks_name" {
   type    = string
-  default = "fastned"
+  default = "sample-eks"
 }
 
 variable "eks_version" {

@@ -1,6 +1,6 @@
 variable "eks_name" {
   type    = string
-  default = "fastned"
+  default = "sample-eks"
 }
 
 variable "cluster_autoscaler" {}

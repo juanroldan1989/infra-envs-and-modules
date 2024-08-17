@@ -5,5 +5,5 @@ variable "env" {
 
 variable "eks_name" {
   type    = string
-  default = "fastned"
+  default = "sample-eks"
 }
