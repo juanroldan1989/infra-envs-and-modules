@@ -7,9 +7,6 @@ apply () {
   cd ../eks
   terraform init
   terraform apply --auto-approve
-  cd ../roles
-  terraform init
-  terraform apply --auto-approve
   cd ../addons
   terraform init
   terraform apply --auto-approve
@@ -19,21 +16,29 @@ apply () {
   cd ../loadbalancer
   terraform init
   terraform apply --auto-approve
-  cd ../app-b
+  cd ../argocd
+  terraform init
+  terraform apply --auto-approve
+  cd ../app-a
+  terraform init
+  terraform apply --auto-approve
+  cd ../argocd-app-2
   terraform init
   terraform apply --auto-approve
 }
 
 destroy () {
-  cd app-b
+  cd argocd-app-2
+  terraform destroy --auto-approve
+  cd ../app-a
+  terraform destroy --auto-approve
+  cd ../argocd
   terraform destroy --auto-approve
   cd ../loadbalancer
   terraform destroy --auto-approve
   cd ../autoscaler
   terraform destroy --auto-approve
   cd ../addons
-  terraform destroy --auto-approve
-  cd ../roles
   terraform destroy --auto-approve
   cd ../eks
   terraform destroy --auto-approve
