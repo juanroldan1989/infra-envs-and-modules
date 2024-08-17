@@ -1,3 +1,8 @@
+variable "app_name" {
+  type    = string
+  default = "sample-app"
+}
+
 variable "env" {
   type    = string
   default = "dev"
