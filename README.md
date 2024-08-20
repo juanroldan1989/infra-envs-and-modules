@@ -126,6 +126,11 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 # or using jq
 
 kubectl -n argocd get secret argocd-initial-admin-secret -o json | jq .data.password -r | base64 -d
+
+# or when attribute to extract data from contains a "." in its name -> "tls.crt"
+# Eg.: extracting certificate key from sealed-secrets-124234 secret after installing `kubeseal` CLI
+
+kubectl get secrets sealed-secrets-keyr4vzg -n kube-system -o json | jq .data'."tls.crt"' -r | base64 -d
 ```
 
 (You should delete the initial secret afterwards as suggested by the Getting Started Guide: https://github.com/argoproj/argo-cd/blob/master/docs/getting_started.md#4-login-using-the-cli)
