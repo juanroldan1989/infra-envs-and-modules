@@ -1,12 +1,50 @@
-# infra-envs-and-modules
+<img src="https://github.com/juanroldan1989/terra-ops/blob/main/terra-ops-logo.png" alt="juanroldan1989 terra-ops">
 
-## Project structure (resumed)
+<h4 align="center">Folders Structure | Multiple environments | Infrastructure by Terraform </h4>
+
+<p align="center">
+  <a href="https://github.com/juanroldan1989/terra-ops/commits/main">
+  <img src="https://img.shields.io/github/last-commit/juanroldan1989/terra-ops.svg?style=flat-square&logo=github&logoColor=white" alt="GitHub last commit">
+  <a href="https://github.com/juanroldan1989/terra-ops/issues">
+  <img src="https://img.shields.io/github/issues-raw/juanroldan1989/terra-ops.svg?style=flat-square&logo=github&logoColor=white" alt="GitHub issues">
+  <a href="https://github.com/juanroldan1989/terra-ops/pulls">
+  <img src="https://img.shields.io/github/issues-pr-raw/juanroldan1989/terra-ops.svg?style=flat-square&logo=github&logoColor=white" alt="GitHub pull requests">
+  <a href="https://github.com/juanroldan1989/terra-ops/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg">
+  </a>
+</p>
+
+<p align="center">
+  <a href="#terra-ops">Terra Ops</a> •
+  <a href="#project-structure-resumed">Project Structure</a> •
+  <a href="#terraform">Terraform</a> •
+  <a href="#configuration-details">Configuration Details</a> •
+  <a href="#github-actions">Github Actions</a> •
+  <a href="#references">References</a> •
+  <a href="#contribute">Contribute</a>
+</p>
+
+# Terra Ops
+
+This project structure allows engineers to:
+
+1. Work on `specific` environments they are allowed to.
+2. Each envs folder (`dev`, `prod`, etc) is associated with a specific `Terraform` workspace.
+3. `Add/Remove` modules as they need in order to build their applications within their environments.
+4. Deploy specific applications/modules (e.g.: `networking`, `addons`, `argocd-app-1`) within their specific environments.
+
+# Project structure (resumed)
 
 ```ruby
 ├── infra
 │   ├── envs
 │   │   ├── dev
 │   │   │   ...
+│   │   │   ├── app-a
+│   │   │   │   ├── data.tf
+│   │   │   │   ├── main.tf
+│   │   │   │   ├── outputs.tf
+│   │   │   │   └── .terraform.lock.hcl
 │   │   │   ├── eks
 │   │   │   │   ├── data.tf
 │   │   │   │   ├── main.tf
@@ -57,28 +95,30 @@
 │       ...
 ```
 
-The above structure allows engineers to:
+# Terraform
 
-1. Work on specific environments they are allowed to.
-2. Each envs folder (`dev`, `prod`, etc) is associated with a specific `Terraform` workspace.
-3. Add/Remove modules as they need in order to build their applications within their environments.
-4. Deploy specific applications/modules (e.g.: `networking`, `addons`, `argocd-app-1`) within their specific environments.
+`tf.sh` script is available on each `environment` for:
 
-Script below provisions `VPC`, spins up `EKS Cluster`, adds `networking`, `addons` and deploys `app-b` for showcasing purposes:
+- Provisioning `VPC`, `Subnets` and `EKS Cluster`
+- Application deployment through Kubernetes `Ingress`, `Service` and `Deployment` resources.
 
 ```ruby
+# Provisioning infrastructure within `DEV` environment
+
 $ cd infra/envs/dev
 
 $ ./tf.sh apply
 ```
 
-Same script can be used to remove infrastructure and apps:
+Same script can be used to remove infrastructure and any apps within specific environment:
 
 ```ruby
 $ cd infra/envs/dev
 
 $ ./tf.sh destroy
 ```
+
+# Configuration details
 
 ## EKS Cluster
 
@@ -166,35 +206,38 @@ resource "helm_release" "argocd" {
 }
 ```
 
-### References
+# Github Actions
 
-https://spacelift.io/blog/argocd-terraform
+1. Watches for changes within `dev` environment/folder and triggers provisioning/deployment.
+2. Watches for changes within `prod` environment/folder and triggers provisioning/deployment.
+3. [WIP] Configs remote state and associate `dev` folder with `dev` workspace in Terraform.
 
-Terraform with GitOps: https://spacelift.io/blog/terraform-gitops
+# Monitoring
 
-## Github Actions - Automation
+[WIP] - Prometheus & cAdvisor & Grafana
 
-1. Watch for changes within `dev` environment.
-2. Watch for changes within `prod` environment.
-3. Setup remote state and associate `dev` folder with `dev` workspace in Terraform.
+# Remote state management
 
-## Monitoring
+[WIP] https://github.com/kunduso/add-aws-ecr-ecs-fargate/blob/main/deploy/backend.tf
 
-Integrate Graphana and Kibana
-
-## Logs
-
-## Backend `remote` implementation
-
-### Setup S3 state storage
+```ruby
+terraform {
+  backend "s3" {
+    bucket  = "ecs-app-XXX"
+    encrypt = true
+    key     = "terraform-state/terraform.tfstate"
+    region  = "us-east-1"
+  }
+}
+```
 
 https://spacelift.io/blog/terraform-remote-state#benefits-of-using-terraform-remote-state
 
-### Modules
+# Modules
 
-- Have 1 sample application imported from a Github repo instead of a folder within `modules` folder.
+[WIP] Showcase 1 sample application imported from another `Github` repo instead of a folder within `modules` folder.
 
-## Tagging
+# Tagging
 
 All resources should be tagged properly:
 
@@ -208,7 +251,22 @@ tags = {
 
 Example:
 
-```
+```ruby
 "payment-app-staging-ingress"
 "frontend-app-production-vpc"
 ```
+
+# References
+
+- https://spacelift.io/blog/argocd-terraform
+- https://spacelift.io/blog/terraform-gitops
+
+# Contribute
+
+Got **something interesting** you'd like to **add or change**? Please feel free to [Open a Pull Request](https://github.com/juanroldan1989/terra-ops/pulls)
+
+If you want to say **thank you** and/or support the active development of `Terra Ops`:
+
+1. Add a [GitHub Star](https://github.com/juanroldan1989/terra-ops/stargazers) to the project.
+2. Tweet about the project [on your Twitter](https://twitter.com/intent/tweet?text=Hey%20I've%20just%20discovered%20this%20cool%20app%20on%20Github%20by%20@JhonnyDaNiro%20-%20Deploy%20Terra%20Ops&url=https://github.com/juanroldan1989/terra-ops/&via=Github).
+3. Write a review or tutorial on [Medium](https://medium.com), [Dev.to](https://dev.to) or personal blog.
