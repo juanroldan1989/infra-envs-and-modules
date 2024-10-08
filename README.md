@@ -28,10 +28,11 @@
 
 This project structure allows engineers to:
 
-1. Work on `specific` environments they are allowed to.
-2. Each envs folder (`dev`, `prod`, etc) is associated with a specific `Terraform` workspace.
-3. `Add/Remove` modules as they need in order to build their applications within their environments.
-4. Deploy specific applications/modules (e.g.: `networking`, `addons`, `argocd-app-1`) within their specific environments.
+1. Work on **specific** environments they are allowed to.
+2. **Add/Remove** modules as they need in order to build their applications within their environments.
+3. Deploy specific applications/modules (e.g.: **networking**, **addons**, **argocd-app-1**) within their specific environments.
+
+Each envs folder (**dev**, **prod**, etc) is associated with a specific Terraform **workspace**.
 
 # Project structure (resumed)
 
@@ -95,20 +96,31 @@ This project structure allows engineers to:
 │       ...
 ```
 
-# Terraform
+# How it works
 
-`tf.sh` script is available on each `environment` for:
+1. Repository is cloned within local machine.
+2. Terraform workspace is setup within a specific local environment folder, e.g.: **dev**, **feature-7890**.
+3. Engineer adds modules/apps as neededd within that folder and pushes changes to repo.
+4. Github Actions pipeline triggers validations and Terraform provisioning/deployment based on changes pushed.
 
-- Provisioning `VPC`, `Subnets` and `EKS Cluster`
+# Provisioning script
+
+**tf.sh** script is available on each `environment` to facilitate quick validations, tests and can be customized by engineers as needed.
+
+Script by default provides below capabilities:
+
+- Provisioning `VPC`, `Subnets` and `EKS Cluster`.
 - Application deployment through Kubernetes `Ingress`, `Service` and `Deployment` resources.
 
-```ruby
-# Provisioning infrastructure within `DEV` environment
+## Provisioning infrastructure within `DEV` environment
 
+```ruby
 $ cd infra/envs/dev
 
 $ ./tf.sh apply
 ```
+
+## Removing infrastructure within `DEV` environment
 
 Same script can be used to remove infrastructure and any apps within specific environment:
 
@@ -118,9 +130,55 @@ $ cd infra/envs/dev
 $ ./tf.sh destroy
 ```
 
-# Configuration details
+# Ready-to-use modules included in repo
+
+## AWS VPC, Networking and LoadBalancer
+
+- Located at: `infra/modules/networking`
+- Located at: `infra/modules/loadbalancer`
+
+## Helm Standard App provisioner
+
+Located at: `infra/modules/applications/app-helm-installer-example`
+
+```ruby
+resource "helm_release" "hello" {
+  name = "hello"
+
+  repository = "https://helm.github.io/examples"
+  chart      = "hello-world"
+  namespace  = "hello-ns"
+  values = [file("${path.module}/values/custom.yaml")]
+
+  set {
+    name  = "awsRegion"
+    value = "us-east-1"
+  }
+}
+```
 
 ## EKS Cluster
+
+Located at: `infra/modules/eks`
+
+```ruby
+resource "aws_eks_cluster" "eks" {
+  name     = "${var.app_name}-${var.env}-${var.eks_name}"
+  version  = var.eks_version
+  role_arn = aws_iam_role.eks.arn
+
+  vpc_config {
+    endpoint_private_access = false
+    endpoint_public_access  = true
+
+    subnet_ids = [
+      var.private_zone1,
+      var.private_zone2
+    ]
+  }
+
+...
+```
 
 Check user currently used to make calls via CLI:
 
@@ -141,6 +199,80 @@ Check for access:
 ```ruby
 $ kubectl get nodes
 ```
+
+## K8S Health Metrics Server
+
+Located at: `infra/addons/main.tf`
+
+```ruby
+resource "helm_release" "metrics_server" {
+  name = "metrics-server"
+
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart      = "metrics-server"
+  namespace  = "kube-system"
+  version    = "3.12.1"
+
+  values = [file("${path.module}/values/metrics-server.yaml")]
+
+  depends_on = [var.eks_node_group_general]
+}
+```
+
+## K8S Ingress + Service + Deployment resources
+
+Located at: `infra/modules/external-lb-with-cluster-ip-service`
+
+```ruby
+...
+
+resource "kubernetes_deployment" "second" {
+  metadata {
+    name      = "second"
+    namespace = "second-ns"
+    labels = {
+      App = "second"
+    }
+  }
+
+  spec {
+    replicas = 2
+    ...
+
+resource "kubernetes_service" "second" {
+  metadata {
+    name      = "second-service"
+    namespace = "second-ns"
+  }
+
+  spec {
+    selector = {
+...
+
+resource "kubernetes_ingress_v1" "second_ingress" {
+  wait_for_load_balancer = true
+
+  metadata {
+    name      = "second-ingress"
+    namespace = "second-ns"
+    annotations = {
+      "alb.ingress.kubernetes.io/scheme"           = "internet-facing"
+      "alb.ingress.kubernetes.io/target-type"      = "ip"
+      "alb.ingress.kubernetes.io/healthcheck-path" = "/health"
+    }
+  }
+
+  spec {
+    ingress_class_name = "alb"
+...
+```
+
+# Terraform workspaces
+
+Useful CLI commands:
+https://developer.hashicorp.com/terraform/cli/workspaces
+
+# Configuration details
 
 ## Argo CD Server
 
@@ -231,35 +363,15 @@ terraform {
 }
 ```
 
-https://spacelift.io/blog/terraform-remote-state#benefits-of-using-terraform-remote-state
-
 # Modules
 
 [WIP] Showcase 1 sample application imported from another `Github` repo instead of a folder within `modules` folder.
-
-# Tagging
-
-All resources should be tagged properly:
-
-```ruby
-...
-
-tags = {
-  Name = "${var.app_name}-${var.env}-<resource-name>"
-}
-```
-
-Example:
-
-```ruby
-"payment-app-staging-ingress"
-"frontend-app-production-vpc"
-```
 
 # References
 
 - https://spacelift.io/blog/argocd-terraform
 - https://spacelift.io/blog/terraform-gitops
+- https://spacelift.io/blog/terraform-remote-state#benefits-of-using-terraform-remote-state
 
 # Contribute
 
